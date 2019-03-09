@@ -5,7 +5,7 @@ Created on Wed Feb  6 17:16:22 2019
 @author: Adam P, Andrew C
 """
 import numpy as np
-import mars_rocketsim as rockSim
+#import v3_mars as rockSim
 import RhaoEq as nProf
 import scipy.optimize as opt
 import tank_solution
