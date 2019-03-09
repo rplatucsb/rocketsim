@@ -1,2 +1,5 @@
-# rocketsim
-Multi Physics simulation of the flight path of RPL's rocket
+# rocketsimulation
+Calculates rocket parameters for basic inputs. 
+Currently designed around optimizing chamber pressure
+
+  
