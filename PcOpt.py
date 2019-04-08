@@ -109,6 +109,8 @@ def pcOpt(cPress,mass,diameter,moreData = False):
         tEng = []
         for i in pc:
             xD,yD = nProf.design(i,disp = disp) #coordinates from RHAO Code
+            innerSurface = 2 * np.pi * np.trapz(yD,xD)
+            print(innerSurface)
             xD += abThickness
             yD += abThickness
             vIn = np.pi * np.trapz(yD**2,xD) #inner volume
@@ -146,20 +148,20 @@ def pcOpt(cPress,mass,diameter,moreData = False):
     if(moreData):
         parameters.extend(["Lox Tank Mass (kg)","Meth Tank Mass"])
         values.extend([coaxTank.mass_tank_lox,coaxTank.mass_tank_meth])
-    for i in range(0,len(pc)):
-        apogee.append(rockSim.main(3114,diameter/2,(methM[i] + oxM[i]),(nPropMass+mt+mEng[i])))
-    print((methM[0] + oxM[0])*2.2,(nPropMass+mt+mEng[0])*2.2)
-    dryMass =  nPropMass+mt+mEng[0] #+mHe[0]
-    wetMass = dryMass + methM[0] + oxM[0]
-    if(not moreData):
-        return apogee[0]
-    else:
-        parameters.extend(["Apogee (ft)","Dry Mass(lb)","Wet Mass","Isp (s)"])
-        values.extend([apogee,dryMass*2.2,wetMass*2.2,Isp/9.8])
+#    for i in range(0,len(pc)):
+#        apogee.append(rockSim.main(3114,diameter/2,(methM[i] + oxM[i]),(nPropMass+mt+mEng[i])))
+#    print((methM[0] + oxM[0])*2.2,(nPropMass+mt+mEng[0])*2.2)
+#    dryMass =  nPropMass+mt+mEng[0] #+mHe[0]
+#    wetMass = dryMass + methM[0] + oxM[0]
+#    if(not moreData):
+#        return apogee[0]
+#    else:
+#        parameters.extend(["Apogee (ft)","Dry Mass(lb)","Wet Mass","Isp (s)"])
+#        values.extend([apogee,dryMass*2.2,wetMass*2.2,Isp/9.8])
         print("       Parameter                   |     Value     ")
         for parameter, value in list(zip(parameters, values)):
             print(parameter + " "*(35-len(parameter))+"| " + str(value))
-        return apogee,dryMass * 2.2,wetMass*2.2,Isp/9.8
+#        return apogee,dryMass * 2.2,wetMass*2.2,Isp/9.8
 
 
 pcOpt(300,41.5-6+20,6.5,moreData=True) 
