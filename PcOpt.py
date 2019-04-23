@@ -5,7 +5,7 @@ Created on Wed Feb  6 17:16:22 2019
 @author: Adam P, Andrew C
 """
 import numpy as np
-#import v3_mars as rockSim
+import v4_mars as rockSim
 import RhaoEq as nProf
 import scipy.optimize as opt
 import tank_solution
@@ -148,8 +148,8 @@ def pcOpt(cPress,mass,diameter,moreData = False):
     if(moreData):
         parameters.extend(["Lox Tank Mass (kg)","Meth Tank Mass"])
         values.extend([coaxTank.mass_tank_lox,coaxTank.mass_tank_meth])
-#    for i in range(0,len(pc)):
-#        apogee.append(rockSim.main(3114,diameter/2,(methM[i] + oxM[i]),(nPropMass+mt+mEng[i])))
+    for i in range(0,len(pc)):
+        apogee.append(rockSim.main(700,diameter/2,(methM[0] + oxM[0])*2.2,(nPropMass+mt+mEng[i])*2.2))
 #    print((methM[0] + oxM[0])*2.2,(nPropMass+mt+mEng[0])*2.2)
 #    dryMass =  nPropMass+mt+mEng[0] #+mHe[0]
 #    wetMass = dryMass + methM[0] + oxM[0]
@@ -158,14 +158,17 @@ def pcOpt(cPress,mass,diameter,moreData = False):
 #    else:
 #        parameters.extend(["Apogee (ft)","Dry Mass(lb)","Wet Mass","Isp (s)"])
 #        values.extend([apogee,dryMass*2.2,wetMass*2.2,Isp/9.8])
-        print("       Parameter                   |     Value     ")
-        for parameter, value in list(zip(parameters, values)):
-            print(parameter + " "*(35-len(parameter))+"| " + str(value))
-#        return apogee,dryMass * 2.2,wetMass*2.2,Isp/9.8
+#        print("       Parameter                   |     Value     ")
+#        for parameter, value in list(zip(parameters, values)):
+#            print(parameter + " "*(35-len(parameter))+"| " + str(value))
+    return apogee #rockSim.main(700,diameter/2,(methM[0] + oxM[0])*2.2,(nPropMass+mt+mEng[0])*2.2)    
+   #,dryMass * 2.2,wetMass*2.2,Isp/9.8
 
-
-pcOpt(300,41.5-6+20,6.5,moreData=True) 
-
+pc = np.arange(200,400,10.)
+alt = []
+for i in pc:
+    alt.append(pcOpt(i,40,6.5,moreData=False))
+plt.plot(pc,alt)
 
 #print(v1.main(3114,3.25,16.3,25))   
 #print("Max apogee ", max(apogee), " ft at Pc ",  pc[np.argmax(apogee)], " psi dry mass ", dryMass , " kg wet mass ", wetMass)

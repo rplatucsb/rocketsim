@@ -30,3 +30,5 @@ def dims(pChamber,disp):
 dims(300,True)
 #print("AreaRatio", exitAreaRatio)
 #print(np.array([600,700,800,900,1000])/14.6959)
+
+

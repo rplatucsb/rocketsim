@@ -19,6 +19,7 @@ def design(pC,disp = False,reso = .01):
     tNF = np.poly1d(tNC)
     tEC = np.polyfit(eRat,tEData,2)
     tEF = np.poly1d(tEC)
+    lStar = 100 #cm
     #inputs
     minT = 1
     res = .01
@@ -71,7 +72,7 @@ def design(pC,disp = False,reso = .01):
     x2,y2 = nozzle(t)
     
     vCon = np.pi * np.trapz(y**2,x)
-    vCyl = 100*(rT**2*np.pi) - vCon
+    vCyl = lStar*(rT**2*np.pi) - vCon
     lCh = vCyl/(rE**2*np.pi)
     xC,yC = [x[0]-lCh],[y[0]]
     
@@ -91,15 +92,15 @@ def design(pC,disp = False,reso = .01):
     return xInterp,yInterp
 
 
+design(100,disp=True,reso=.001)
 
-
-xVals,yVals = design(550,reso=.1)
-xVals *= .01
-xVals -= xVals[0]
-yVals *= .01
-
-with open('Nozzle550psi.csv',mode='w',newline='') as nozzFile:
-    writer = csv.writer(nozzFile)
-    writer.writerow(xVals)
-    writer.writerow(yVals)
+#xVals,yVals = design(300,reso=.1)
+#xVals *= .01
+#xVals -= xVals[0]
+#yVals *= .01
+#
+#with open('Nozzle300psi.csv',mode='w',newline='') as nozzFile:
+#    writer = csv.writer(nozzFile)
+#    writer.writerow(xVals)
+#    writer.writerow(yVals)
 
