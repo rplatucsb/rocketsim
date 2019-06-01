@@ -10,7 +10,7 @@ import NozzleCreator as nozz
 import csv
 
 #####Data and Rhao process from http://www.aspirespace.org.uk/downloads/Thrust%20optimised%20parabolic%20nozzle.pdf
-def design(pC,disp = False,reso = .01):
+def design(pC,MR,disp = False,reso = .01,chamberRadiusScaleUpFactor = 1):
     #Data 
     eRat = np.array([3.5,4,5,6,7,8,9,10,20])
     tNData = np.array([19.8,21.6,23,24,24.8,25.3,26,27.2,28.9])
@@ -24,11 +24,10 @@ def design(pC,disp = False,reso = .01):
     minT = 1
     res = .01
     #nozzle and throat characteristics from my code
-    epsilon,dT,dE = nozz.dims(pC,disp)
+    epsilon,dT,dE = nozz.dims(pC,MR,disp)
     rE,rT = dE/2,dT/2
     lN = .8*(rT*(np.sqrt(epsilon)-1))/np.tan(np.deg2rad(15))
     tN,tE = tNF(epsilon),tEF(epsilon)
-    
     #all inputs in degrees and cm, outputs in cm
     def entranceT(theta): #converging
         theta = np.deg2rad(theta)
@@ -73,7 +72,7 @@ def design(pC,disp = False,reso = .01):
     
     vCon = np.pi * np.trapz(y**2,x)
     vCyl = lStar*(rT**2*np.pi) - vCon
-    lCh = vCyl/(rE**2*np.pi)
+    lCh = vCyl/((chamberRadiusScaleUpFactor*rE)**2*np.pi)
     xC,yC = [x[0]-lCh],[y[0]]
     
     xNet = np.concatenate((xC,x,x1,x2))
@@ -88,19 +87,24 @@ def design(pC,disp = False,reso = .01):
 #        plt.plot(xInterp,(yInterp/min(yInterp))**2)
     if(disp):
        plot()
+       print(lN,tN,tE,max(yNet),min(xNet))
        pass
     return xInterp,yInterp
 
 
-design(100,disp=True,reso=.001)
+#design(300,disp=True,reso=.001)
 
-#xVals,yVals = design(300,reso=.1)
+#xVals,yVals = design(300,reso=.05,disp=True)
 #xVals *= .01
 #xVals -= xVals[0]
 #yVals *= .01
 #
+#file = open(r'nozzfile.txt','w')
+#for i in range(len(xVals)):
+#    file.write(str(xVals[i]) + " " + str(yVals[i])+' 0 \n')
+#file.close()
 #with open('Nozzle300psi.csv',mode='w',newline='') as nozzFile:
 #    writer = csv.writer(nozzFile)
 #    writer.writerow(xVals)
 #    writer.writerow(yVals)
-
+#

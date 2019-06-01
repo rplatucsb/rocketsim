@@ -7,54 +7,36 @@ Created on Mon Feb 11 20:23:01 2019
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize as opt
-import PcOpt as alt
+import PcOptV2 as alt
 from mpl_toolkits.mplot3d import Axes3D
 
+def f(inputs):
+    return -1 * alt.apogeeCalc(inputs)
+#print(opt.minimize(f,[250,3],method='trust-constr',bounds = ((150,800),(2.3,3.3)),options={'disp':True,'maxiter' : 5}))
+#print(opt.fmin_tnc(f,[200,3],bounds = ((150,800),(2.3,3.3)),approx_grad=True))
 
-def f(pc,m,d):
-    return -alt.pcOpt(pc,m,d)
+count = 11
+chamberPressure = np.linspace(150,800,count)
+mixtureRatio = np.linspace(2.3,3.6,count)
+altitude = np.zeros((count,count,3))
 
-count = 10
-mass = np.linspace(10,75,count)
-diameter = np.linspace(5.5,8,count)
-allowedMass = []
-pc =  np.zeros((count,count))
-altitude = np.zeros((count,count))
-
-
-
-for di,d in enumerate(diameter):
+for mri,mr in enumerate(mixtureRatio):
     maxmass = True
-    for mi,m in enumerate(mass):
-        cP = opt.fminbound(f,150,600,args=(m,d),xtol = 1)
-        pc[di][mi] = cP
-        altitude[di][mi] = alt.pcOpt(cP,m,d)     
-        print(mi+(di*count))
-        if(altitude[di][mi] < 45000 and maxmass):
-            allowedMass.append([d,m]) #alt.pcOpt(cP,i,d,moreData=True)[1]])
-            maxmass = False
+    for pci,pc in enumerate(chamberPressure):
+        inputs = [pc,mr]
+        altitude[mri][pci][0] = pc
+        altitude[mri][pci][1] = mr
+        altitude[mri][pci][2] = alt.apogeeCalc(inputs,display=False)    
+        print(pci+(mri*count))
 
-am = np.array(allowedMass)
-x,y = np.meshgrid(mass,diameter)
-
-plt.figure(1)
-plt.plot(am[:,0],am[:,1])
-plt.xlabel("Rocket Diameter(in)")
-plt.ylabel("Dry Mass (lb)")
+x,y = np.meshgrid(chamberPressure,mixtureRatio)
 
 plt.figure(2)
 ax = plt.axes(projection='3d')
-ax.set_xlabel("Non-Propulsion Mass (lb)")
-ax.set_ylabel("Diameter (in)")
-ax.set_zlabel("Optimal Pc (psi))")
-ax.plot_surface(x,y, pc, cmap='viridis', edgecolor='none')
-
-
-
-plt.figure(3)
-ax = plt.axes(projection='3d')
-ax.set_xlabel("Non-Propulsion Mass (lb)")
-ax.set_ylabel("Diameter (in)")
+ax.set_xlabel("Chamber pressure (psi)")
+ax.set_ylabel("Mixture Ratio ")
 ax.set_zlabel("Apogee (ft))")
-ax.plot_surface(x,y, altitude, cmap='viridis', edgecolor='none')
+ax.plot_surface(x,y, altitude[:,:,2], cmap='viridis', edgecolor='none')
 
+t = altitude[np.where(altitude[:,:,2] == np.max(altitude[:,:,2]))]
+print(t)

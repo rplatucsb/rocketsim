@@ -32,7 +32,7 @@ def main(thrust_lbf,innerRadius_in,fuel_mass_lb,dry_rocket_mass_lb):
             altitude_pressure = mojave_pressure * (mojave_temperature/(mojave_temperature-a_slope*height))**(avg_g*M/(-a_slope*gas_R))
         else: #above 11k meters the temperature is relatively constant
             altitude_temperature = mojave_temperature - ( 11000 * meters_to_feet * temp_slope )
-            print(altitude_temperature)
+            #print(altitude_temperature)
             altitude_density = mojave_density * math.exp((-avg_g*M*height)/(gas_R*mojave_temperature))
             altitude_pressure = mojave_pressure * math.exp((-avg_g*M*height)/(gas_R*mojave_temperature))
 
@@ -112,7 +112,7 @@ def main(thrust_lbf,innerRadius_in,fuel_mass_lb,dry_rocket_mass_lb):
 
         if current_mach >= mach_flutter:
             mach_flutter_list.append(mach_flutter)
-            print(mach_flutter, current_mach)
+           #print(mach_flutter, current_mach)
 
         chance_flutter = ( current_mach - mach_flutter ) / mach_flutter
 
@@ -324,7 +324,7 @@ def main(thrust_lbf,innerRadius_in,fuel_mass_lb,dry_rocket_mass_lb):
             if thrust < ( force_drag + force_gravity ):
                 force_drag = thrust - force_gravity
                 acceleration = ( weather_adjust_factor * thrust - force_gravity - force_drag ) / total_rocket_mass #finds resultant acceleration
-                print("Uh oh. Rocket's going down")
+               #print("Uh oh. Rocket's going down")
 
         velocity += ( acceleration * dt ) #increment velocity by small steps
         height += ( velocity * dt ) #same process for height
@@ -356,6 +356,7 @@ def main(thrust_lbf,innerRadius_in,fuel_mass_lb,dry_rocket_mass_lb):
         time += dt2
 
         height_adjust = weather_adjust_factor * height
+        print(height)
 
         if height > height_track: #stops the simulation when rocket is at apogee
             height_track = height
@@ -364,22 +365,22 @@ def main(thrust_lbf,innerRadius_in,fuel_mass_lb,dry_rocket_mass_lb):
 
         append_lists()
     return round(height_track*meters_to_feet,3)
-#    print('')
-#    print("Max velocity =", round(velocity_track*meters_to_feet,3), "ft/s")
-#    print("Max mach =", round(mach_track,3))
-#    print("Max dynamic pressure =", round(q_track*pa_to_psi,3), "psi")
-#    print("Max drag force =", round(max(force_drag_list)/lbf_to_n,3), "lbf")
-#    print("Max acceleration =", round(max(acceleration_list)*meters_to_feet,3), "ft/s^2")
-#    print("Center of pressure =", round(center_of_pressure()/12,3), "ft from top")
-#    print("Velocity off the rail =", round(rail_velocity()*meters_to_feet,3), "ft/s")
+#   #print('')
+#   #print("Max velocity =", round(velocity_track*meters_to_feet,3), "ft/s")
+#   #print("Max mach =", round(mach_track,3))
+#   #print("Max dynamic pressure =", round(q_track*pa_to_psi,3), "psi")
+#   #print("Max drag force =", round(max(force_drag_list)/lbf_to_n,3), "lbf")
+#   #print("Max acceleration =", round(max(acceleration_list)*meters_to_feet,3), "ft/s^2")
+#   #print("Center of pressure =", round(center_of_pressure()/12,3), "ft from top")
+#   #print("Velocity off the rail =", round(rail_velocity()*meters_to_feet,3), "ft/s")
 #    sound_acceleration()
-#    print("Acceleration through transonic = [", round(s_acc_list[0]*meters_to_feet,3),",", round(s_acc_list[-1]*meters_to_feet,3),"] ft/s^2")
+#   #print("Acceleration through transonic = [", round(s_acc_list[0]*meters_to_feet,3),",", round(s_acc_list[-1]*meters_to_feet,3),"] ft/s^2")
 #    if len(mach_flutter_list) >= 1:
-#        print("Fin Status: [Removed]")
+#       #print("Fin Status: [Removed]")
 #    else:
-#        print("Fin Status: [Attached]")
-#    print("Apogee =" , round(height_track*meters_to_feet,3), "ft")
-#    print('')
+#       #print("Fin Status: [Attached]")
+#   #print("Apogee =" , round(height_track*meters_to_feet,3), "ft")
+#   #print('')
 #    plot_plots()
 
 # thrust_lbf = float(args[1])
