@@ -1,4 +1,4 @@
-a # -*- coding: utf-8 -*-
+ # -*- coding: utf-8 -*-
 """
 Created on Wed Feb  6 17:16:22 2019
 
@@ -56,7 +56,7 @@ def pcOpt(cPress,mass,diameter,mixtureRatio = 2.8, moreData = False):
     
 
     pd_inj = 0.2*pc #pressure drop across injector 
-    pd_cool = .2*pc #pressure drop across cool ing channels
+    pd_cool = 0#.2*pc #pressure drop across cool ing channels
     pd_plumb = 0.2*pc #pressure drop across plumbing
     pt = pc+pd_inj+pd_cool+pd_plumb #pressure in fuel and ox tanks
     pt_si = pt*6894.757 #chamber pressure (Pa)

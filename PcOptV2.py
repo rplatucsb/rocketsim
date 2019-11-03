@@ -13,7 +13,7 @@ import v5_mars_appropriated as rockSim
 import NozzleCreator
 import RhaoEq as engineProfile
 from math import log10,floor
-import Tanks_Approx_Oy as propTank
+import Tanks_Approx_W_6_1_19 as propTank
 
 def sigfigs(x,n):
     return round(x, n-int(floor(log10(abs(x)))))
@@ -137,33 +137,37 @@ def apogeeCalc(inputs,independantMass = indepMasslb, rocketDiameter = 6.5,displa
         if(disp):
             parameters.extend(["Coax tank mass (lb)"])
             values.extend([mass])
-        return mass,length
-            
+        return mass * 1.5,length
+    
+
     #first run, with guesstimates for masses
     mProps,vOxidiser,vFuel = propellantData(burnTime)
     tankMass,tankLen = tankData(vFuel,vOxidiser)
     heMass = pressureData()
-    dryMass = 2.2 * (mAblative + heMass) + independantMass + tankMass
+    dryMass = 2.2 * (mAblative + heMass) + independantMass + tankMass 
     apogee2,burnTime2 = rockSim.main(tFunc,rocketDiameter/2,mProps * 2.2,dryMass,bTimeCalc = True) 
-
+    
     #final run, using true-er masses
     mProps,vOxidiser,vFuel = propellantData(burnTime2,disp=display)
     tankMass,tankLen = tankData(vFuel,vOxidiser,disp=display)
     heMass = pressureData(disp = display)
-    dryMass = 2.2 * (mAblative + heMass) + independantMass + tankMass
+    dryMass = 2.2 * (mAblative + heMass) + independantMass + tankMass 
     apogee3,burnTime3 = rockSim.main(tFunc,rocketDiameter/2,mProps * 2.2,dryMass) 
     
     #get center of mass
+    #mAblative = 1
     comBot,mBot = 8 * 12 * 2.54 + tankLen + (8.2 *(12*2.54) / 2.2 +(mAblative)*(eLen/2+(2/3*12*2.54)))/(12.3/2.2+(mAblative)),12.3/2.2+(mAblative)
     comNet = (comTop*mTop+comBot*mBot+tankMass*(8*12*2.54+tankLen/2))/(tankMass+mTop+mBot)
+    lNet = (3.21 + 2.01 + 2.7)*12*2.54 + tankLen
     
     if(display):
-        parameters.extend(["Burn Time (s)","Apogee (ft)","Dry Mass (lb)","Distance Top to Center of mass (cm)"])
-        values.extend([burnTime3,apogee3,dryMass,comNet])
+        parameters.extend(["Burn Time (s)","Apogee (ft)","Dry Mass (lb)","Distance Top to Center of mass (cm)","Rocket Length"])
+        values.extend([burnTime3,apogee3,dryMass,comNet,lNet])
     if(display):
         print("       Parameter                   |     Value     ")
         for parameter, value in list(zip(parameters, values)):
             print(parameter + " "*(35-len(parameter))+"| " + str(sigfigs(float(value),3)))
+            
     return apogee3
     
-apogeeCalc([300,2.8],display=True)
+apogeeCalc([800,3.2],independantMass=indepMasslb,display=True)

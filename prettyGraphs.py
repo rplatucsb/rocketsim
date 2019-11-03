@@ -15,7 +15,7 @@ def f(inputs):
 #print(opt.minimize(f,[250,3],method='trust-constr',bounds = ((150,800),(2.3,3.3)),options={'disp':True,'maxiter' : 5}))
 #print(opt.fmin_tnc(f,[200,3],bounds = ((150,800),(2.3,3.3)),approx_grad=True))
 
-count = 11
+count = 10
 chamberPressure = np.linspace(150,800,count)
 mixtureRatio = np.linspace(2.3,3.6,count)
 altitude = np.zeros((count,count,3))
@@ -40,3 +40,6 @@ ax.plot_surface(x,y, altitude[:,:,2], cmap='viridis', edgecolor='none')
 
 t = altitude[np.where(altitude[:,:,2] == np.max(altitude[:,:,2]))]
 print(t)
+
+
+
