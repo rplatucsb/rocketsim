@@ -26,11 +26,12 @@ rpaPoints = np.array(rpaPoints)
 def kInterp(mr,pc):
     return griddata(rpaPoints[:,0:2],rpaPoints[:,2],(mr,pc),method = 'linear')
 
+#Constants
 pOut = .101325  * 10**6 #0.101325 * 10**6 #pressure at exit of nozzle in mpa
 desiredThrust = 3114 #Newtons
 thrustCorrectionFactor = .9527 # estimated efficiency of our nozzle
 psiToMpa = 6894.76 
-#Find engine areas
+#Find engine throat and exit areas
 def dims(pChamber,mRatio,disp=False):
     k = kInterp(mRatio,pChamber)
     pChamber *= psiToMpa
@@ -47,7 +48,7 @@ def dims(pChamber,mRatio,disp=False):
         print(2*np.sqrt(throatArea/np.pi)*100, "cm is the throat diameter", 2*np.sqrt(minChamberArea/np.pi)*100, "cm is the min chamber diameter", 2*np.sqrt(throatArea*exitAreaRatio/np.pi)*100,"cm is exit diameter")
     return exitAreaRatio,2*np.sqrt(throatArea/np.pi)*100,2*np.sqrt(throatArea*exitAreaRatio/np.pi)*100
 
-#give a thrust of altitude curve, acurate within -2 of RPA
+#give a thrust of altitude curve, and matrix, acurate within -2 of RPA
 def altThrust(pChamber,mRatio):
     pRange = np.linspace(.101325  * 10**6,(.101325/2)*10**6,20)
     k = kInterp(mRatio,pChamber)
