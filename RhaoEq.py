@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import NozzleCreator as nozz
 import csv
 
-#####Data and Rhao process from http://www.aspirespace.org.uk/downloads/Thrust%20optimised%20parabolic%20nozzle.pdf
+#####Data and Rao process from http://www.aspirespace.org.uk/downloads/Thrust%20optimised%20parabolic%20nozzle.pdf
 def design(pC,MR,disp = False,reso = .01,chamberRadiusScaleUpFactor = 1):
     #Data 
     eRat = np.array([3.5,4,5,6,7,8,9,10,20])
@@ -53,7 +53,7 @@ def design(pC,MR,disp = False,reso = .01,chamberRadiusScaleUpFactor = 1):
     #find theta for which converging width = nozzle exit width
     def diff(theta):
         x1,y1 = entranceT(theta)
-        x2,y2 = nozzle(1)
+        x2,y2 = nozzle(1)[0],chamberRadiusScaleUpFactor*rE
         return y1-y2
        
     for i in np.arange(-300,-100,.5):
@@ -73,7 +73,7 @@ def design(pC,MR,disp = False,reso = .01,chamberRadiusScaleUpFactor = 1):
     vCon = np.pi * np.trapz(y**2,x)
     vCyl = lStar*(rT**2*np.pi) - vCon
     lCh = vCyl/((chamberRadiusScaleUpFactor*rE)**2*np.pi)
-    xC,yC = [x[0]-lCh],[y[0]]
+    xC,yC = [x[0]-lCh],[rE * chamberRadiusScaleUpFactor]
     
     xNet = np.concatenate((xC,x,x1,x2))
     yNet = np.concatenate((yC,y,y1,y2))
@@ -83,17 +83,16 @@ def design(pC,MR,disp = False,reso = .01,chamberRadiusScaleUpFactor = 1):
     def plot():
         plt.figure(1)
         plt.plot(xNet,yNet)
-        plt.plot(xInterp,yInterp)
+        #plt.plot(xInterp,yInterp)
 #        plt.plot(xInterp,(yInterp/min(yInterp))**2)
     if(disp):
        plot()
-       print(lN,tN,tE,max(yNet),min(xNet))
+       print("Nozzle Lengthm, Theta N, Theta E Chamber l " + str (lN) + " " +  str(tN) + " " + str(tE) + " " + str(lCh/(2 * chamberRadiusScaleUpFactor*rE)))
        pass
     return xInterp,yInterp
 
-
-#design(300,disp=True,reso=.001)
-
+design(350,2.8,disp=True,chamberRadiusScaleUpFactor=1.45)
+#Code for Generating A csv of our nozzle
 #xVals,yVals = design(300,reso=.05,disp=True)
 #xVals *= .01
 #xVals -= xVals[0]

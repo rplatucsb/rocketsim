@@ -60,16 +60,24 @@ fuelGuesslb = 35
 massGuesslb = np.sum(m) - fuelGuesslb
 indepMasslb = massGuesslb - ( 1.5 + 2 + 15)
 
-#COM calcs first num  relative to top of nosecone from spec sheet 6/1/19
+#COM calcs. first num  relative to top of nosecone from spec sheet 6/1/19
 comTop,mTop = 2.53,22.7
 comTop *= 12 * 2.54
-mTop /= 2.2
+mTop /= 2.2 # in
+
+#define constants
+g = 9.81
+thrustEst = 3114 #N
+lbtoN = 4.44822 #Converts lbf to n
+impulse = 9208 #Total Impulse (9208 lb-sec Max)
+rhoOx = 1141 #(density of liquid oxygen = 1141 kg/m**3)
+rhoMeth = 425.6 #(density of liquid methane = 425.6 kg/m**3
+impulseN = impulse * lbtoN
 
 #inputs in psi, dimensionless, lb, in
 def apogeeCalc(inputs,independantMass = indepMasslb, rocketDiameter = 6.5,display = False):
     chamberPressure,mixtureRatio = inputs[0],inputs[1]
-    It = 9208 #Total Impulse (9208 lb-sec Max)
-    It = 4.44822*It #Total Impulse (Ns)
+    
     #pressure losses
     dpInject = .2 * chamberPressure
     dpPipe = .2 * chamberPressure
@@ -87,7 +95,6 @@ def apogeeCalc(inputs,independantMass = indepMasslb, rocketDiameter = 6.5,displa
     tFunc,thrust = NozzleCreator.altThrust(chamberPressure,mixtureRatio)
     apogee,burnTime = rockSim.main(tFunc,rocketDiameter/2,fuelGuesslb,massGuesslb,bTimeCalc = True)
     
-    
     #get engine mass
     abThickness = .909 #cm varies from .906 to .912 from 200 to 500psi at chamber, .923 to .927 at throat, .880 to .885 at end of nozzle
     rhoAb = 1100 # kg/m^3
@@ -98,7 +105,7 @@ def apogeeCalc(inputs,independantMass = indepMasslb, rocketDiameter = 6.5,displa
     xAb,yAb = xD + abThickness/np.sqrt(1+m**2)*m, yD + abThickness/np.sqrt(1+m**2) 
     vAbout = np.pi * np.trapz((yAb)**2,xAb)
     vAb = vAbout - vIn
-    vAb *= 1e-6
+    vAb *= 1e-6 #cm^3 to m^3
     mAblative = vAb * rhoAb
     eLen = max(xD)-min(xD)
     if(display):
@@ -112,12 +119,12 @@ def apogeeCalc(inputs,independantMass = indepMasslb, rocketDiameter = 6.5,displa
         
     #get propellants masses and volumes
     def propellantData(burnTime,disp = False):
-        mDot = 3114 / (9.81 * IspSL)
+        mDot = thrustEst / (g * IspSL)
         mProps = mDot * burnTime
         mFuel = mProps/(1+mixtureRatio) #fuel mass
         mOxidiser = mProps/(1+1/mixtureRatio) #ox mass
-        vOxidiser = mOxidiser/1141 #ox volume (density of liquid oxygen = 1141 kg/m**3)
-        vFuel = mFuel/425.6 #fuel volume (density of liquid methane = 425.6 kg/m**3)
+        vOxidiser = mOxidiser/rhoOx #ox volume (density of liquid oxygen = 1141 kg/m**3)
+        vFuel = mFuel/rhoMeth #fuel volume (density of liquid methane = 425.6 kg/m**3)
         if(disp):
             parameters.extend(["Mass of Fuel (kg)","Mass of Oxidiser","Mass of Propellants",
                                "Volume of Fuel (l)","Volume of Oxidiser","Volume of Propellants","Mdot (kg/s)"])
@@ -137,21 +144,20 @@ def apogeeCalc(inputs,independantMass = indepMasslb, rocketDiameter = 6.5,displa
         if(disp):
             parameters.extend(["Coax tank mass (lb)"])
             values.extend([mass])
-        return mass * 1.5,length
-    
-
+        return mass,length
+            
     #first run, with guesstimates for masses
     mProps,vOxidiser,vFuel = propellantData(burnTime)
     tankMass,tankLen = tankData(vFuel,vOxidiser)
     heMass = pressureData()
-    dryMass = 2.2 * (mAblative + heMass) + independantMass + tankMass 
+    dryMass = 2.2 * (mAblative + heMass) + independantMass + tankMass
     apogee2,burnTime2 = rockSim.main(tFunc,rocketDiameter/2,mProps * 2.2,dryMass,bTimeCalc = True) 
-    
+
     #final run, using true-er masses
     mProps,vOxidiser,vFuel = propellantData(burnTime2,disp=display)
     tankMass,tankLen = tankData(vFuel,vOxidiser,disp=display)
     heMass = pressureData(disp = display)
-    dryMass = 2.2 * (mAblative + heMass) + independantMass + tankMass 
+    dryMass = 2.2 * (mAblative + heMass) + independantMass + tankMass
     apogee3,burnTime3 = rockSim.main(tFunc,rocketDiameter/2,mProps * 2.2,dryMass) 
     
     #get center of mass
@@ -162,12 +168,11 @@ def apogeeCalc(inputs,independantMass = indepMasslb, rocketDiameter = 6.5,displa
     
     if(display):
         parameters.extend(["Burn Time (s)","Apogee (ft)","Dry Mass (lb)","Distance Top to Center of mass (cm)","Rocket Length"])
-        values.extend([burnTime3,apogee3,dryMass,comNet,lNet])
+        values.extend([burnTime3,apogee3,dryMass])
     if(display):
         print("       Parameter                   |     Value     ")
         for parameter, value in list(zip(parameters, values)):
             print(parameter + " "*(35-len(parameter))+"| " + str(sigfigs(float(value),3)))
-            
     return apogee3
     
-apogeeCalc([800,3.2],independantMass=indepMasslb,display=True)
+apogeeCalc([350,2.8],display=True)

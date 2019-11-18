@@ -26,17 +26,14 @@ rpaPoints = np.array(rpaPoints)
 def kInterp(mr,pc):
     return griddata(rpaPoints[:,0:2],rpaPoints[:,2],(mr,pc),method = 'linear')
 
-#k = 1.1655#dimensionless cnst ratio of specific heats of gas mixture
 pOut = .101325  * 10**6 #0.101325 * 10**6 #pressure at exit of nozzle in mpa
-#pChamber = 300 * 6894.76 #np.array([100,200,300,400,500]) * (0.00689476)  * 10**6  #first number is in psi
 desiredThrust = 3114 #Newtons
-thrustCorrectionFactor = .95
-g=9.8
-ISP = 260 #seconds
-pRange = np.linspace(.101325  * 10**6,(.101325/2)*10**6,20)
-def dims(pChamber,mRatio,disp):
+thrustCorrectionFactor = .9527 # estimated efficiency of our nozzle
+psiToMpa = 6894.76 
+#Find engine areas
+def dims(pChamber,mRatio,disp=False):
     k = kInterp(mRatio,pChamber)
-    pChamber *= 6894.76
+    pChamber *= psiToMpa
     tCoeff = np.sqrt((2*(k**2))/(k-1)*((2/(k+1))**((k+1)/(k-1)))*(1-(pOut/pChamber)**((k-1)/k))) 
     throatArea = desiredThrust/(pChamber*thrustCorrectionFactor*tCoeff) #m^2 is unit here
     exitAreaRatio = 1/((((k+1)/2)**(1/(k-1)))*((pOut/pChamber)**(1/k))*np.sqrt(((k+1)/(k-1))*(1-((pOut/pChamber)**((k-1)/k)))))
@@ -52,23 +49,13 @@ def dims(pChamber,mRatio,disp):
 
 #give a thrust of altitude curve, acurate within -2 of RPA
 def altThrust(pChamber,mRatio):
+    pRange = np.linspace(.101325  * 10**6,(.101325/2)*10**6,20)
     k = kInterp(mRatio,pChamber)
     exitArea,throatDiameter,exitDameter = dims(pChamber,mRatio,False)
-    pChamber *= 6894.76
+    pChamber *= psiToMpa
     tCoeff = np.sqrt((2*(k**2))/(k-1)*((2/(k+1))**((k+1)/(k-1)))*(1-(pOut/pChamber)**((k-1)/k))) + (pOut-pRange)/pChamber * ((exitDameter/2)**2*np.pi)/((throatDiameter/2)**2*np.pi)
     thrust = tCoeff * ((throatDiameter/200)**2*np.pi) * pChamber * thrustCorrectionFactor
     tTransform = np.polyfit(pRange,thrust,1)
     tFunc = np.poly1d(tTransform)
     return tFunc,thrust
-
-#import matplotlib.pyplot as plt
-#tFunc,thrust = altThrust(300,2.8)
-#plt.plot(pRange,thrust,'o')
-#plt.plot(pRange,tFunc(pRange))
-#print(pRange)
-#print(thrust)
-#dims(300,2.8,True)
-#print("AreaRatio", exitAreaRatio)
-#print(np.array([600,700,800,900,1000])/14.6959)
-
 
