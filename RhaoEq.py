@@ -10,7 +10,11 @@ import NozzleCreator as nozz
 import csv
 
 #####Data and Rao process from http://www.aspirespace.org.uk/downloads/Thrust%20optimised%20parabolic%20nozzle.pdf
-def design(pC,MR,disp = False,reso = .01,chamberRadiusScaleUpFactor = 1):
+#inputs
+#    bevelScale  #length fraction of chamber which will become bezeir curve
+#    minT  # angle at which the first arc starts
+#    res #resolution
+def design(pC,MR,disp = False,res = .001,chamberRadiusScaleUpFactor = 1,bevelScale = .4,minT = -135):
     #Data 
     eRat = np.array([3.5,4,5,6,7,8,9,10,20])
     tNData = np.array([19.8,21.6,23,24,24.8,25.3,26,27.2,28.9])
@@ -20,16 +24,13 @@ def design(pC,MR,disp = False,reso = .01,chamberRadiusScaleUpFactor = 1):
     tEC = np.polyfit(eRat,tEData,2)
     tEF = np.poly1d(tEC)
     lStar = 100 #cm
-    #inputs
-    minT = 1
-    bevelScale = .4
-    res = .001
     #nozzle and throat characteristics from my code
     epsilon,dT,dE = nozz.dims(pC,MR,disp)
     rE,rT = dE/2,dT/2
     lN = 0.8*(rT*(np.sqrt(epsilon)-1))/np.tan(np.deg2rad(15))
     tN,tE = tNF(epsilon),tEF(epsilon)
     #all inputs in degrees and cm, outputs in cm
+    #define bezeir converging curve
     def conv(t):
         eX,eY = entranceT(minT)
         nX,nY = xC[0] + lCh * (1-bevelScale), rE * chamberRadiusScaleUpFactor
@@ -42,18 +43,21 @@ def design(pC,MR,disp = False,reso = .01,chamberRadiusScaleUpFactor = 1):
         y = (1-t)**2 * nY + 2*(1-t)*t*qY + t**2*eY  
         return x,y
     
+    #Define first arc
     def entranceT(theta): #converging
         theta = np.deg2rad(theta)
         x = 1.5 * rT * np.cos(theta) 
         y = 1.5 * rT * np.sin(theta) + 2.5 * rT
         return x,y
     
+    #Define second  arc
     def exitT(theta): #diverging
         theta = np.deg2rad(theta)
         x = .382 * rT * np.cos(theta)
         y = .382 * rT * np.sin(theta) + 1.382 * rT
         return x,y
     
+    #Define bezier diverging portion
     def nozzle(t): #nozzle
         nX,nY = exitT(tN-90)
         eX,eY = lN,rE
@@ -63,6 +67,7 @@ def design(pC,MR,disp = False,reso = .01,chamberRadiusScaleUpFactor = 1):
         x = (1-t)**2 * nX + 2*(1-t)*t*qX + t**2*eX
         y = (1-t)**2 * nY + 2*(1-t)*t*qY + t**2*eY  
         return x,y
+    
     #find theta for which converging width = nozzle exit width
 #    def diff(theta):
 #        x1,y1 = entranceT(theta)
@@ -73,8 +78,6 @@ def design(pC,MR,disp = False,reso = .01,chamberRadiusScaleUpFactor = 1):
 #        if diff(i) < 0 :
 #            minT =  i
 #            break
-    minT = -135
-    
     thetaE = np.arange(minT,-90+res,res)
     x,y = entranceT(thetaE)
     
@@ -97,15 +100,15 @@ def design(pC,MR,disp = False,reso = .01,chamberRadiusScaleUpFactor = 1):
         vCon += np.pi * np.trapz(yB**2,xB)
         vCyl = lStar*(rT**2*np.pi) - vCon
         lCh = vCyl/((chamberRadiusScaleUpFactor*rE)**2*np.pi)
-        xC,yC = [x[0]-lCh],[rE * chamberRadiusScaleUpFactor]
-        
+        xC,yC = np.array([xB[0]-lCh]),np.array([rE * chamberRadiusScaleUpFactor])
         xB,yB = conv(t)
 
     xNet = np.concatenate((xC,xB,x,x1,x2))
     yNet = np.concatenate((yC,yB,y,y1,y2))
     
-    xInterp = np.arange(xC[0],x2[-1],reso)
+    xInterp = np.arange(xC[0],x2[-1],res)
     yInterp = np.interp(xInterp,xNet,yNet)
+
     def plot():
         plt.figure(1)
         plt.plot(xNet,yNet)
@@ -113,18 +116,20 @@ def design(pC,MR,disp = False,reso = .01,chamberRadiusScaleUpFactor = 1):
         plt.figure(2)
         plt.plot(xB,yB)
         plt.plot(x,y)
-        #plt.plot(xInterp,yInterp)
-#        plt.plot(xInterp,(yInterp/min(yInterp))**2)
+
     if(disp):
        plot()
-       print("Nozzle Lengthm, Theta N, Theta E Chamber length/diameter chamber length " + str (lN) + " " +  str(tN) + " " + str(tE) + " " + str(lCh/(2 * chamberRadiusScaleUpFactor*rE)) + " " + str(max(x)-min(xC)))
+       print("Nozzle Length, Theta N, Theta E Chamber length/diameter chamber length " + str (lN) + " " +  str(tN) + " " + str(tE) + " " + str(lCh/(2 * chamberRadiusScaleUpFactor*rE)) + " " + str(max(x)-min(xC)))
        pass
     return xInterp,yInterp
 
 
-design(350,2.8,disp=True,chamberRadiusScaleUpFactor=1.35)
-#Code for Generating A csv of our nozzle
-#xVals,yVals = design(350,2.8,reso=.05,disp=True,chamberRadiusScaleUpFactor=1.45)
+xVals,yVals = design(350,2.8,disp=True,chamberRadiusScaleUpFactor=1.35,bevelScale=.02)
+yC = np.where(yVals == min(yVals))
+cVol = np.pi * np.trapz(yVals[:int(yC[0])]**2,xVals[:int(yC[0])])
+print("Chamber L* : " + str(cVol/(min(yVals)**2*np.pi)))
+
+#Code for Generating A csv or txt of our nozzle
 #xVals *= .01
 #xVals -= xVals[0]
 #yVals *= .01
