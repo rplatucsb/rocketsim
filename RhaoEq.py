@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import NozzleCreator as nozz
 import csv
 
+intocm = 0.393701
 #####Data and Rao process from http://www.aspirespace.org.uk/downloads/Thrust%20optimised%20parabolic%20nozzle.pdf
 #inputs
 #    bevelScale  #length fraction of chamber which will become bezeir curve
@@ -118,10 +119,16 @@ def design(pC,MR,disp = False,res = .001,chamberRadiusScaleUpFactor = 1,bevelSca
         plt.figure(2)
         plt.plot(xB,yB)
         plt.plot(x,y)
+        plt.figure(3)
+        plt.plot(xNet*intocm,yNet*intocm)
+        plt.plot(xNet*intocm,-yNet*intocm)
+        plt.xlabel("X (in)")
+        plt.ylabel("Y (in)")
+        plt.ylim(-(max(xNet)-min(xNet))*intocm/2,(max(xNet)-min(xNet))*intocm/2)
 
     if(disp):
        plot()
-       print("Nozzle Length" + str (lN) + " \n Theta N " +  str(tN) + " \n Theta E Chamber " + str(tE) + " \n Cylinder length/diameter " + str(lCh/(2 * chamberRadiusScaleUpFactor*rE)) + " \n chamber length " + str(max(x)-min(xC)))
+       print("Nozzle Length " + str (lN) + " \n Theta N " +  str(tN) + " \n Theta E Chamber " + str(tE) + " \n Cylinder length/diameter " + str(lCh/(2 * chamberRadiusScaleUpFactor*rE)) + " \n chamber length " + str(max(x)-min(xC)))
        print("Chamber L/D " + str(-xInterp[0]/(2*rE*chamberRadiusScaleUpFactor)))
        pass
     return xInterp,yInterp
