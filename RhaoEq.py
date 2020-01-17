@@ -112,7 +112,10 @@ def design(pC,MR,disp = False,res = .001,chamberRadiusScaleUpFactor = 1,bevelSca
 
     def plot():
         plt.figure(1)
-        plt.plot(xNet,yNet)
+        plt.plot(x,y)
+        plt.plot(x1,y1)
+        plt.plot(x2,y2)
+        plt.plot(xB,yB)
         plt.xlabel("X (cm)")
         plt.ylabel("Y (cm)")
         plt.ylim((0,min(yNet) + max(xNet)-min(xNet)))
@@ -128,7 +131,7 @@ def design(pC,MR,disp = False,res = .001,chamberRadiusScaleUpFactor = 1,bevelSca
 
     if(disp):
        plot()
-       print("Nozzle Length " + str (lN) + " \n Theta N " +  str(tN) + " \n Theta E Chamber " + str(tE) + " \n Cylinder length/diameter " + str(lCh/(2 * chamberRadiusScaleUpFactor*rE)) + " \n chamber length " + str(max(x)-min(xC)))
+       print("Nozzle Length " + str (lN) + " \nTheta N " +  str(tN) + " \nTheta E Chamber " + str(tE) + " \nCylinder length/diameter " + str(lCh/(2 * chamberRadiusScaleUpFactor*rE)) + " \nchamber length " + str(max(x)-min(xC)))
        print("Chamber L/D " + str(-xInterp[0]/(2*rE*chamberRadiusScaleUpFactor)))
        pass
     return xInterp,yInterp
@@ -138,7 +141,7 @@ xVals,yVals = design(350,2.8,disp=True,chamberRadiusScaleUpFactor=1.65,bevelScal
 yC = np.where(yVals == min(yVals))
 cVol = np.pi * np.trapz(yVals[:int(yC[0])]**2,xVals[:int(yC[0])])
 print("Chamber L* : " + str(cVol/(min(yVals)**2*np.pi)))
-
+print("Contraction Ratio : " + str(max(yVals)**2/min(yVals)**2))
 #Code for Generating A csv or txt of our nozzle
 #xVals *= .01
 #xVals -= xVals[0]
