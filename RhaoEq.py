@@ -143,16 +143,16 @@ cVol = np.pi * np.trapz(yVals[:int(yC[0])]**2,xVals[:int(yC[0])])
 print("Chamber L* : " + str(cVol/(min(yVals)**2*np.pi)))
 print("Contraction Ratio : " + str(max(yVals)**2/min(yVals)**2))
 #Code for Generating A csv or txt of our nozzle
-#xVals *= .01
-#xVals -= xVals[0]
-#yVals *= .01
-#
-#file = open(r'nozzfile.txt','w')
-#for i in range(len(xVals)):
-#    file.write(str(xVals[i]) + " " + str(yVals[i])+' 0 \n')
-#file.close()
-#with open('Nozzle350psi2.8MR.csv',mode='w',newline='') as nozzFile:
-#    writer = csv.writer(nozzFile)
-#    writer.writerow(xVals)
-#    writer.writerow(yVals)
-#
+xVals *= .01
+xVals -= xVals[0]
+yVals *= .01
+
+file = open(r'nozzfile.txt','w')
+for i in range(len(xVals)):
+    file.write(str(xVals[i]) + " " + str(yVals[i])+' 0 \n')
+file.close()
+with open('Nozzle350psi2.8MR.csv',mode='w',newline='') as nozzFile:
+    writer = csv.writer(nozzFile)
+    writer.writerow(xVals)
+    writer.writerow(yVals)
+
